@@ -6,7 +6,8 @@ class PlaylistContainer extends React.Component {
 	constructor () {
 		super()
 		this.state = {
-			inputValue: ''
+			inputValue: '',
+			validInput: true
 		}
 		this.handleChange = this.handleChange.bind(this);
 		this.submitForm = this.submitForm.bind(this);
@@ -14,8 +15,14 @@ class PlaylistContainer extends React.Component {
 	}
 
 	handleChange(evt){
+    	let nameIsValid = true;
+
     	const value = evt.target.value;
+    	const nameLength = this.state.inputValue.length;
+    	if ( nameLength <= 16 && nameLength > 0 ) nameIsValid=false;
+    	else nameIsValid=true;
     	this.setState({
+    		validInput: nameIsValid,
     		inputValue: value
     	});
   	}
@@ -30,6 +37,7 @@ class PlaylistContainer extends React.Component {
   		return(
   			<div>
 		  		<NewPlaylist
+		  			validInput={this.state.validInput}
 		  			inputValue={this.state.inputValue}
 		  			submitForm={this.submitForm} 
 		  			handleChange={this.handleChange} 
