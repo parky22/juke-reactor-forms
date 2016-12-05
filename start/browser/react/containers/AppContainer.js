@@ -8,6 +8,7 @@ import Albums from '../components/Albums.js';
 import Album from '../components/Album';
 import Sidebar from '../components/Sidebar';
 import Player from '../components/Player';
+import PlaylistContainer from './PlaylistContainer';
 
 import { convertAlbum, convertAlbums, convertSong, skip } from '../utils';
 
@@ -23,6 +24,7 @@ export default class AppContainer extends Component {
     this.prev = this.prev.bind(this);
     this.selectAlbum = this.selectAlbum.bind(this);
     this.selectArtist = this.selectArtist.bind(this);
+    this.createPlaylist = this.createPlaylist.bind(this);
   }
 
   componentDidMount () {
@@ -30,7 +32,8 @@ export default class AppContainer extends Component {
     Promise
       .all([
         axios.get('/api/albums/'),
-        axios.get('/api/artists/')
+        axios.get('/api/artists/'),
+        axios.get('/api/playlists/')
       ])
       .then(res => res.map(r => r.data))
       .then(data => this.onLoad(...data));
@@ -41,10 +44,11 @@ export default class AppContainer extends Component {
       this.setProgress(AUDIO.currentTime / AUDIO.duration));
   }
 
-  onLoad (albums, artists) {
+  onLoad (albums, artists, playlists) {
     this.setState({
       albums: convertAlbums(albums),
-      artists: artists
+      artists: artists,
+      playlists: playlists
     });
   }
 
@@ -96,6 +100,16 @@ export default class AppContainer extends Component {
     this.setState({ progress: progress });
   }
 
+  createPlaylist (name){
+    axios.post('/api/playlists', {name: name})
+    .then(res => res.data)
+    .then(playlist => {
+      this.setState({
+        playlists: [...this.state.playlists, playlist]
+      })
+    });
+	}
+
   selectAlbum (albumId) {
     axios.get(`/api/albums/${albumId}`)
       .then(res => res.data)
@@ -130,13 +144,14 @@ export default class AppContainer extends Component {
       toggleOne: this.toggleOne,
       toggle: this.toggle,
       selectAlbum: this.selectAlbum,
-      selectArtist: this.selectArtist
+      selectArtist: this.selectArtist,
+      createPlaylist: this.createPlaylist
     });
 
     return (
       <div id="main" className="container-fluid">
         <div className="col-xs-2">
-          <Sidebar />
+          <Sidebar playlists={this.state.playlists} />
         </div>
         <div className="col-xs-10">
         {

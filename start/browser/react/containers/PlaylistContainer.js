@@ -1,5 +1,6 @@
 import React from 'react';
 import NewPlaylist from '../components/NewPlaylist';
+import axios from 'axios';
 // import Artists from '../components/Artists.js';
 
 class PlaylistContainer extends React.Component {
@@ -7,7 +8,8 @@ class PlaylistContainer extends React.Component {
 		super()
 		this.state = {
 			inputValue: '',
-			validInput: true
+			invalidInput: true,
+			wasEdited: false
 		}
 		this.handleChange = this.handleChange.bind(this);
 		this.submitForm = this.submitForm.bind(this);
@@ -15,33 +17,37 @@ class PlaylistContainer extends React.Component {
 	}
 
 	handleChange(evt){
-    	let nameIsValid = true;
+    	let temp = true;
 
     	const value = evt.target.value;
-    	const nameLength = this.state.inputValue.length;
-    	if ( nameLength <= 16 && nameLength > 0 ) nameIsValid=false;
-    	else nameIsValid=true;
+    	const nameLength = value.length;
+    	if ( nameLength <= 16 && nameLength > 0 ) temp=false;
+
     	this.setState({
-    		validInput: nameIsValid,
-    		inputValue: value
+    		invalidInput: temp,
+    		inputValue: value,
+				wasEdited: true
     	});
   	}
 
   	submitForm(evt) {
-  		console.log(this.state.inputValue);
+  		const name = this.state.inputValue;
   		evt.preventDefault();
   		this.setState({inputValue: ''});
+			this.props.createPlaylist(name);
   	}
 
   	render() {
+
   		return(
   			<div>
 		  		<NewPlaylist
-		  			validInput={this.state.validInput}
+		  			invalidInput={this.state.invalidInput}
 		  			inputValue={this.state.inputValue}
-		  			submitForm={this.submitForm} 
-		  			handleChange={this.handleChange} 
+		  			submitForm={this.submitForm}
+		  			handleChange={this.handleChange}
 		  		/>
+					{(this.state.invalidInput && this.state.wasEdited) ? <div className="alert alert-warning">Please enter a name</div> : null}
 	  		</div>
 	  	)
   	}
